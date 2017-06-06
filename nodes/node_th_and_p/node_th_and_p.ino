@@ -8,14 +8,17 @@
 #include <SPI.h>
 #include "RF24.h"
 
-const enum commands {pOn, pOff, getAirTH};
+//const enum commands {pOn, pOff, getAirTH};
+enum commands{pOn, pOff, getAirTH};
+
+byte addresses[][6] = {"S1","N1"};
 
 struct payload_request_t{
   char message[15];
 };
 
 struct payload_general_t{
-  enum command;
+  int command;
   int destination;
   char message[14];
 };
@@ -26,7 +29,7 @@ payload_general_t incoming;
 RF24 radio(7,8);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println(F("Arduino start listening..."));
 
   radio.begin();
@@ -36,16 +39,14 @@ void setup() {
   radio.setPALevel(RF24_PA_LOW);
 
   // Open a writing and reading pipe on each radio, with opposite addresses
-  radio.openWritingPipe("Node1");
-  radio.openReadingPipe(1,"Server1");
+  radio.openWritingPipe(addresses[1]);
+  radio.openReadingPipe(1,addresses[0]);
 
   // Start the radio listening for data
   radio.startListening();
 }
 
 void loop() {
-/****************** Pong Back Role ***************************/
-
     unsigned long got_time;
 
     if( radio.available()){
@@ -55,16 +56,24 @@ void loop() {
         radio.read(&incoming, sizeof(payload_general_t));
       }
 
-      if(data.command==pOn){
+      if(incoming.command==pOn){
         Serial.print(F("Power on"));
-      }elsif(data.command==pOff){
-        Serial.print(F("Power off"));
-      }elsif(data.command==getAirTH){
+      }else if(incoming.command==pOff){
+        Serial.print(F("Power off\n"));
+        Serial.print(F("Port: "));
+        Serial.print(incoming.message);
+        Serial.print(F("\n"));
+      }else if(incoming.command==getAirTH){
         Serial.print(F("Air TH"));
       }
 
+      if(incoming.destination==5){
+        Serial.print(F("5 is received!"));  
+      }
+
       radio.stopListening();                                        // First, stop listening so we can talk
-      outgoing.message = "OK";
+
+      strcpy(outgoing.message, "OK");
       radio.write( &outgoing, sizeof(payload_request_t) );              // Send the final one back.
       radio.startListening();                                       // Now, resume listening so we catch the next packets.
       Serial.print(F("Sent response "));
