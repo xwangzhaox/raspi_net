@@ -1,4 +1,5 @@
 #include "SWTFT.h" // Hardware-specific library
+#include "time.h"
 #define  BLACK   0x0000
 #define BLUE    0x001F
 #define RED     0xF800
@@ -9,6 +10,10 @@
 #define WHITE   0xFFFF
 
 SWTFT tft;
+
+String xxx = "xxx";
+float new_data[3];
+float bbb[3] = {23.53, 34.14};
 
 void setup() {
   // put your setup code here, to run once:
@@ -30,18 +35,32 @@ void setup() {
 
   tft.fillScreen(BLACK);
   // Title
-  tft.setCursor(100, 3);
-  tft.setTextColor(YELLOW);  tft.setTextSize(1);
+  tft.setTextColor(YELLOW);  tft.setTextSize(2);
   tft.print("Temp and Hum Display");
-  
+  tft.print(sizeof(bbb));
   delay(1000);
-  Serial.println(F("Done!"));
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  String rx_buffer;
-  rx_buffer=Serial.readString();
-  Serial.print(rx_buffer);
-  tft.print(rx_buffer);
+  while (Serial.available() > 0) {
+    String rx_buffer;
+    rx_buffer=Serial.readString();
+    int n = sync_th(rx_buffer, "_");
+    Serial.print(new_data[1]);
+    tft.print(new_data[2]); 
+  }
+}
+
+int sync_th(String str, const char* spl)
+{
+    int n = 0;
+    char *result = NULL;
+    result = strtok(str.c_str(), spl);
+    while( result != NULL )
+    {
+        new_data[n++] = atof(result);
+        result = strtok(NULL, spl);
+    }
+    return n;
 }

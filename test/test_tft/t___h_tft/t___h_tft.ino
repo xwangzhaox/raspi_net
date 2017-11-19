@@ -14,8 +14,9 @@
 SWTFT tft;
 
 int x,y; //声明坐标
-float tArr[31] = {0, 23.6, 28.4, 38.5, 10.3, -10.4, 5.3, -13.4, 23.4, 23.6, 28.4, 38.5, 10.3, -10.4, 5.3, -13.4, 23.4, 23.6, 28.4, 38.5, 10.3, -10.4, 5.3, -13.4, 23.4, 23.6, 28.4, 38.5, 10.3, -10.4, 5.4};
-float hArr[31] = {0, 50.6, 35.4, 80.7, 98.8 ,67.8, 59.4, 62.3, 72.6, 52.6, 68.3, 50.6, 35.4, 80.7, 98.8 ,67.8, 59.4, 62.3, 72.6, 52.6, 68.3, 50.6, 35.4, 80.7, 98.8 ,67.8, 59.4, 62.3, 72.6, 2.6, 100.0};
+float tArr[31] = {0.39, 23.6, 28.4, 38.5, 10.3, -10.4, 5.3, -13.4, 23.4, 23.6, 28.4, 38.5, 10.3, -10.4, 5.3, -13.4, 23.4, 23.6, 28.4, 38.5, 10.3, -10.4, 5.3, -13.4, 23.4, 23.6, 28.4, 38.5, 10.3, 1.56, 1.56};
+float hArr[31] = {0.72, 50.6, 35.4, 80.7, 98.8 ,67.8, 59.4, 62.3, 72.6, 52.6, 68.3, 50.6, 35.4, 80.7, 98.8 ,67.8, 59.4, 62.3, 72.6, 52.6, 68.3, 50.6, 35.4, 80.7, 98.8 ,67.8, 59.4, 62.3, 72.6, 99, 99};
+float new_data[3];
 //enmu type ["t", "h", "gt", "gh"]
 
 void setup(void) {
@@ -45,72 +46,77 @@ void setup(void) {
 void loop(void) {
 
 //  Got T and H
-  float data*;
-  if( radio.available()){
-      while (radio.available()) {                                   // While there is data ready
-        // get command data
-        radio.read(&incoming, sizeof(payload_general_t));
-      }
+  while (Serial.available() > 0) {
+    int timeLocation = 0;
+    float wx = (tft.width()-40)/31;
+    String th_data;
+    th_data = Serial.readString();
+    sync_th(th_data, "_");
 
-      if(incoming.message[0]=="t"){
-        sync_t_and_h(incoming.message);
-      }else if(incoming.message[0]=="s"){
-        int currentHour = sync_time(incoming.message);
-        delay(50000);
-        // X 轴刻度同步
-        tft.setCursor(5, height-15);
-        tft.print("17:00");
-        tft.setCursor(width-35, height-15);
-        tft.print("24:00");
-        int times = 0;
-        for(int x=29;x<width-20;x+=9)
-        {
-          if(currentHour-24>0)
-            currentHour += 24;
-          times++;
-          if(times==7){
-            tft.drawLine(x, 15, x, height-18, BLUE);
-            tft.setCursor(x-15, height-15);
-            tft.print("%d:00",currentHour-times);
-          }
-          if(times==19){
-            tft.drawLine(x, 15, x, height-18, BLUE);
-            tft.setCursor(x-15, height-15);
-            tft.print("%d:00",currentHour-times);
-          }
-        }
-      }// end else
-    }// end if
-//  init type
-  tft.setColor(0,255,255);
-  array arr[]*;
-  switch (type)
-  {
-      case 1:
-        if(tArr.length>=30)
-          tArr[0].remove;
-        tArr[tArr.length+1] = data;
-        arr = tArr;
-        tft.print(text, 5, 0);
-        break;
-      case 2:
-        if(hArr.length>=30)
-          hArr[0].remove;
-        hArr[hArr.length+1] = data;
-        arr =  hArr;
-        tft.print(text, 5, 0);
-        break;
+    if(tArr[30]!=0.00){
+      // 当数组满长度的情况下,所有元素前移,最后一位改成新的数据
+      for(int i=0; i<=sizeof(tArr)/4-1; i++){
+        tArr[i] = tArr[i+1];
+        hArr[i] = hArr[i+1];
+      }
+      tArr[30] = new_data[0];
+      hArr[30] = new_data[1];
+      timeLocation = tft.width() - 27;
+    }else{
+      // 当数组不满长度,最后一个0.00的位置改为新值
+      timeLocation = modifyLastElement(tArr, new_data[0])+ 8 + wx;  
+      timeLocation = modifyLastElement(hArr, new_data[1])+ 8 + wx;
+    }
+    drawBaseChart();
+    drawChartLine();
+
+    // X 轴刻度同步
+    tft.setCursor(timeLocation-5, tft.height()-15);
+    char string[25];  
+    tft.print( strcat(itoa(new_data[2], string, 10), ":00") );
+    int xPoint = (int)timeLocation-new_data[2]*wx+2;
+    tft.setCursor(xPoint-13, tft.height()-15);
+    tft.print("00:00");
+    tft.drawLine(xPoint, 16, xPoint, tft.height()-16, BLUE);
+    int leftXTime = sizeof(tArr)/4 -1 - (int)new_data[2];
+    if(leftXTime>=24)
+      leftXTime -= 24;
+    tft.setCursor(18, tft.height()-15);
+    char str[25];
+    tft.print( strcat(itoa(leftXTime, str, 10), ":00") );
   }
-  drawChartLine(arr);
+  
+//        tft.setCursor(width-35, height-15);
+//        tft.print("24:00");
+//        int times = 0;
+//        for(int x=29;x<width-20;x+=9)
+//        {
+//          if(currentHour-24>0)
+//            currentHour += 24;
+//          times++;
+//          if(times==7){
+//            tft.drawLine(x, 15, x, height-18, BLUE);
+//            tft.setCursor(x-15, height-15);
+//            tft.print("%d:00",currentHour-times);
+//          }
+//          if(times==19){
+//            tft.drawLine(x, 15, x, height-18, BLUE);
+//            tft.setCursor(x-15, height-15);
+//            tft.print("%d:00",currentHour-times);
+//          }
+//        }
+//      }// end else
+//    }// end if
+//  init type
 }
 
 void drawChartLine(){
-  int x = 20;
+  int x = 25;
   int width = tft.width();
   float wx = (width-40)/31;
   float thx = (tft.height() - 30) / 80;
   float hhx = (tft.height() - 30) / 100;
-  for(int i=0;i<sizeof(tArr)/4;i++){
+  for(int i=0;i<sizeof(tArr)/4-1;i++){
     // T Lins
       // current point y
       float tH = 15 + (50 - tArr[i]) * thx;
@@ -161,10 +167,10 @@ void drawBaseChart()
   tft.setCursor(width-20, height-15-8);
   tft.print("0");
   // 中横线
-  tft.drawLine(21, height/2, width-20, height/2, BLUE);
+  tft.drawLine(26, height/2, width-30, height/2, BLUE);
 
   int l = -1;
-  for (int i=29; i<width-20; i+=9)//画坐标轴刻度 
+  for (int i=34; i<width-30; i+=9)//画坐标轴刻度 
   {
     l++;
     if(l%3==0){
@@ -177,11 +183,38 @@ void drawBaseChart()
 
   }
 
-  tft.drawRect(20, 14, width-40, height-30, YELLOW);//画边框（矩形函数）
+  tft.drawRect(25, 14, width-48, height-30, YELLOW);//画边框（矩形函数）
   //画网格
-  for(int x=29;x<width-20;x+=9)
+  for(int x=34;x<width-30;x+=9)
   {
     for(int y=18;y<height-20;y+=10)
       tft.drawPixel(x,y,WHITE);
   }
+}
+
+void sync_th(String str, const char* spl)
+{
+    int n = 0;
+    char *result = NULL;
+    result = strtok(str.c_str(), spl);
+    while( result != NULL )
+    {
+        new_data[n++] = atof(result);
+        result = strtok(NULL, spl);
+    }
+}
+
+int modifyLastElement(float *arr, float data)
+{
+  int j;
+  for(int i=31; i>0; i--){
+//    Serial.println(arr[i]);
+    if(*(arr+i)==0.00){
+      j = i;
+    }else{
+      *(arr+j) = data;
+      break;
+    }
+  }
+  return (31-j);
 }
