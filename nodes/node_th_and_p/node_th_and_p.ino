@@ -10,19 +10,17 @@
 #include "stdlib.h"
 #include "DHT.h"
 
-enum commands{pOn, pOff, getAirTH};
-
 byte addresses[][6] = {"S1","N3"};
 char seps[]   = "_";
 char *command;
+int keep_time=0;
+int pin=0;
 
 struct payload_request_t{
   char message[15];
 };
 
 struct payload_general_t{
-//  int command;
-//  int destination;
   char message[14];
 };
 
@@ -59,38 +57,25 @@ void loop() {
         radio.read(&incoming, sizeof(payload_general_t));
       }
 
-
-//      if(incoming.command==pOn){
-//        Serial.print(F("Power on"));
-//      }else if(incoming.command==pOff){
-//        Serial.print(F("Power off\n"));
-//        Serial.print(F("Port: "));
-//        Serial.print(incoming.message);
-//        Serial.print(F("\n"));
-//      }else if(incoming.command==getAirTH){
-//        Serial.print(F("Air TH"));
-//      }
-
-//      command = strtok( incoming.message, seps );
-//      while(command !=NULL)
-//      {
-//        Serial.print(command);
-//        Serial.print(F("\n"));
-//        command=strtok(NULL,seps);
-//      }
-Serial.print(F("Message: "));
-Serial.print(incoming.message);
-        Serial.print(F("\n"));
-      char dst[3][3];
+      Serial.print(F("Message: "));
+      Serial.print(incoming.message);
+      Serial.print(F("\n"));
+      
+      char dst[4][4];
       int cnt = split(dst, incoming.message, "_");
-      if(strcmp(&dst[0][0],"p")==0){
+      if(strcmp(&dst[1][0],"p")==0){
         Serial.print(F("PUT "));
-        Serial.print(dst[2]);
-        int pin = atoi(dst[2]);
+        Serial.print(dst[0]);
+        pin = atoi(dst[0]);
         pinMode(pin,OUTPUT);
-        if(strcmp(* &dst[1],"on")==0){
+        if(strcmp(* &dst[2],"on")==0){
           Serial.print(F(" ON."));
           digitalWrite(pin, HIGH);
+          keep_time = atoi(dst[3]);
+          if(keep_time>1){
+            delay(1000*keep_time);
+            digitalWrite(pin, LOW);
+          }
         }else{
           Serial.print(F(" OFF"));
           digitalWrite(pin, LOW);
@@ -98,10 +83,12 @@ Serial.print(incoming.message);
         delay(1000);
         Serial.print(F("\n"));
         strcpy(outgoing.message, "OK");
-      }else if (strcmp(&dst[0][0],"g")==0){
-        if(strcmp(* &dst[1],"th")==0){
+      }else if (strcmp(&dst[1][0],"g")==0){
+        if(strcmp(* &dst[2],"th")==0){
           Serial.print(F("return th: "));
-          DHT dht(2, DHT22);
+          pin = atoi(* &dst[0]);
+          Serial.print(pin);
+          DHT dht(pin, DHT22);
           dht.begin();
           float humidity = dht.readHumidity();
           float temperature = dht.readTemperature();
@@ -109,7 +96,7 @@ Serial.print(incoming.message);
           char temperature_str[6];
           dtostrf(humidity, 2, 2, humidity_str);
           dtostrf(temperature, 2, 2, temperature_str);
-          strcat(humidity_str, ";");
+          strcat(humidity_str, "_");
           strcpy(outgoing.message, strcat(humidity_str, temperature_str));
           Serial.print(outgoing.message);
           Serial.println();
@@ -122,11 +109,16 @@ Serial.print(incoming.message);
       radio.startListening();                                       // Now, resume listening so we catch the next packets.
       Serial.print(F("Sent response "));
       Serial.println(outgoing.message);
+      if(keep_time>1){
+        delay(1000*keep_time);
+        digitalWrite(pin, LOW); 
+        keep_time = 0;
+      }
    }
 } // Loop
 
 // 将str字符以spl分割,存于dst中，并返回子字符串数量
-int split(char dst[][3], char* str, const char* spl)
+int split(char dst[][4], char* str, const char* spl)
 {
     int n = 0;
     char *result = NULL;
