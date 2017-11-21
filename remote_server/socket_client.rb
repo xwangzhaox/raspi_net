@@ -65,8 +65,10 @@ class SocketClient
           update_timestamp(SETTING_PATH, cron_respond["timestamp"])
         end
 
-        if(respond["emergency_treatment_list_changed"])
+        if(respond["etl_changed"])
           emergency_treatment_respond = _get(@setting["interface"]["sync_emergency_treatment"]+"?space_code="+@setting["space_code"])
+          binding.pry
+          return
           update_boundary_value_list(emergency_treatment_respond)
         end
       end
@@ -76,12 +78,14 @@ class SocketClient
   end
 
   def online
-    _post(setting[:interface][:online])
+    _get(setting[:interface][:online])
   end
 
+  # 请在执行前确保已经初始化了当前用户的crontab
   def init_crontab
     cron_respond = _get(@setting["interface"]["get_corntab_lines"]+"?space_code="+@setting["space_code"])
-    update_crontab(cron_respond[:new_lines], cron_respond[:remove_lines])
+    hartbit = "*/1 * * * * sudo /home/pi/.rvm/wrappers/ruby-2.2.3@rails5/ruby /home/pi/workspace/remote_server/hartbit.rb"
+    update_crontab(cron_respond[:new_lines].insert(0, hartbit), [])
     update_timestamp(cron_respond[:timestamp])
   end
 end

@@ -5,6 +5,7 @@ interface:
   upload_data: http://0.0.0.0:3000/survey_data/upload
   sync_corntab: http://0.0.0.0:3000/spaces/sync_crontab
   sync_emergency_treatment: http://0.0.0.0:3000/spaces/sync_emergency_treatment
+  hartbit: http://0.0.0.0:3000/spaces/hartbit
 commands:
   at: AT
   ate_close: ATE0
