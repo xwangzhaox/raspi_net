@@ -1,9 +1,9 @@
-space_code: "j3ke8c"
-crontab_timestamp: ""
+space_code: "jdj6k6"
+crontab_timestamp: "1511191029"
 interface:
-  upload_data: ""
-  get_corntab_lines: ""
-  get_boundary_list: ""
+  upload_data: "http://0.0.0.0:3000/survey_data/upload"
+  sync_corntab: "http://0.0.0.0:3000/spaces/sync_crontab"
+  sync_emergency_treatment: "http://0.0.0.0:3000/spaces/sync_emergency_treatment"
 commands:
   at: "AT"
   ate_close: "ATE0"
