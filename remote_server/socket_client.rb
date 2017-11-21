@@ -58,16 +58,15 @@ class SocketClient
     if true#init_sim
       # respond = http_post(setting[:interface][:upload_data], @params)
       respond = _post(@setting["interface"]["upload_data"], @params)
-
-      if(respond[:rcord]==1)
-        if(respond[:crontab_changed])
-          cron_respond = _get(@setting["interface"]["get_corntab_lines"]+"?space_code="+setting[:space_code])
-          update_crontab(cron_respond[:new_lines], cron_respond[:remove_lines])
-          update_timestamp(cron_respond[:timestamp])
+      if(respond["rcord"]==1)
+        if(respond["update_cron"])
+          cron_respond = _get(@setting["interface"]["sync_corntab"]+"?space_code="+@setting["space_code"])
+          update_crontab(cron_respond["new_lines"], cron_respond["remove_lines"])
+          update_timestamp(SETTING_PATH, cron_respond["timestamp"])
         end
 
-        if(respond[:emergency_treatment_list_changed])
-          emergency_treatment_respond = _get(@setting["interface"]["get_boundary_list"]+"?space_code="+setting[:space_code])
+        if(respond["emergency_treatment_list_changed"])
+          emergency_treatment_respond = _get(@setting["interface"]["sync_emergency_treatment"]+"?space_code="+@setting["space_code"])
           update_boundary_value_list(emergency_treatment_respond)
         end
       end
@@ -88,4 +87,4 @@ class SocketClient
 end
 
   #SocketClient.new(ARGV[0], ARGV[1], ARGV[2]).validate_action
-  SocketClient.new("o1zh6u", "2_p_on_30", "").validate_action
+  SocketClient.new("o1zh6u", "A2_g_th", "39.10_83.31").validate_action
