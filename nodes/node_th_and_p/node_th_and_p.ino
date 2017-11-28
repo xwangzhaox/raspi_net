@@ -63,7 +63,9 @@ void loop() {
       
       char dst[4][4];
       int cnt = split(dst, incoming.message, "_");
-      if(strcmp(&dst[1][0],"p")==0){
+      if(strcmp(* &dst[0],"ol")==0){
+        strcpy(outgoing.message, "OL");
+      }else if(strcmp(&dst[1][0],"p")==0){
         Serial.print(F("PUT "));
         Serial.print(dst[0]);
         pin = atoi(dst[0]);

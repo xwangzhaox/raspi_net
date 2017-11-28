@@ -50,7 +50,7 @@ class SocketClient
 	  :firsthand_action => @firsthand_action,
       :value => params
     }
-    # check_boundary_value(note_code, port, @params)
+    check_boundary_value(action, note_code, port, @params)
     send_to_remote_server
   end
 
@@ -67,9 +67,7 @@ class SocketClient
 
         if(respond["etl_changed"])
           emergency_treatment_respond = _get(@setting["interface"]["sync_emergency_treatment"]+"?space_code="+@setting["space_code"])
-          binding.pry
-          return
-          update_boundary_value_list(emergency_treatment_respond)
+          update_emergency_treatment_list(emergency_treatment_respond)
         end
       end
     else
