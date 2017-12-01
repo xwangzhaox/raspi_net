@@ -2,10 +2,13 @@
 space_code: jdj6k6
 crontab_timestamp: '1511247743'
 interface:
-  upload_data: http://0.0.0.0:3000/survey_data/upload
-  sync_corntab: http://0.0.0.0:3000/spaces/sync_crontab
-  sync_emergency_treatment: http://0.0.0.0:3000/spaces/sync_emergency_treatment
-  hartbit: http://0.0.0.0:3000/spaces/hartbit
+  upload_data: http://192.168.31.178:3000/survey_data/upload
+  update_cmd_quota: http://192.168.31.178:3000/spaces/update_cmd_quota
+  sync_crontab: http://192.168.31.178:3000/spaces/sync_crontab
+  sync_activate: http://192.168.31.178:3000/spaces/sync_activate
+  hartbit: http://192.168.31.178:3000/spaces/hartbit
+  get_devise_list: http://192.168.31.178:3000/spaces/get_devise_list
+  upload_node_online_state: http://192.168.31.178:3000/spaces/upload_node_online_state
 commands:
   at: AT
   ate_close: ATE0
@@ -28,3 +31,10 @@ commands:
   http_send: AT+HTTPACTION=1
   http_read: AT+HTTPREAD
   http_close: AT+HTTPTERM
+cmd_quota_timestamp:
+cmd_quota:
+  th:
+  - temp
+  - humi
+  light:
+  - light
