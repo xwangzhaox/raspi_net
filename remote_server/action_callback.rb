@@ -33,6 +33,7 @@ class ActionCallback
     if @firsthand_action.downcase == "ol"
       redis = ::Redis.new(host:'127.0.0.1', port:6379)
       redis.hset("devise-online", @node_code, true)
+      redis.expire("devise-online", 1800)
       return
     end
     if(@action[0]=="g")
@@ -72,6 +73,6 @@ class ActionCallback
   end
 end
 
-  #SocketClient.new(ARGV[0], ARGV[1], ARGV[2]).validate_action
+  ActionCallback.new(ARGV[0], ARGV[1], ARGV[2]).validate_action
   #SocketClient.new("o1zh6u", "A2_g_th", "39.10_83.31").validate_action
-ActionCallback.new("o1zh6u", "OL", "").validate_action
+  #ActionCallback.new("o1zh6u", "OL", "").validate_action

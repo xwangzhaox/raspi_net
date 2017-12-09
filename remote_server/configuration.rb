@@ -15,6 +15,9 @@ class Configuration
   SETTING_PATH= "/home/pi/workspace/remote_server/config.yml"
 
   def initialize(space_code)
+    if space_code.nil?
+      raise "Error: space_code could not be blank."
+    end
     @setting = YAML.load_file(SETTING_PATH)
     init_space_code(SETTING_PATH, space_code)
   end
@@ -35,4 +38,4 @@ class Configuration
     end
   end
 end
-Configuration.new.init_space ARGV[0]
+Configuration.new(ARGV[0]).init_space

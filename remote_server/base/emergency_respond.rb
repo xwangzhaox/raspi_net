@@ -23,7 +23,7 @@ module Base
     end
 
     def update_activate_list(list)
-      if db = load_db
+      if list.size>0 and db = load_db
         sql = "INSERT INTO activates VALUES"
         sql += list.inject("") do |result, item|
           item.first.match(/(.*_.*)_(.*)_(.*)/)
