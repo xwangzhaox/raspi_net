@@ -10,7 +10,7 @@
 #include "stdlib.h"
 #include "DHT.h"
 
-byte addresses[][6] = {"S1","N3"};
+byte addresses[][8] = {"8a1isp","fvlest"};
 char seps[]   = "_";
 char *command;
 int keep_time=0;
@@ -74,10 +74,6 @@ void loop() {
           Serial.print(F(" ON."));
           digitalWrite(pin, HIGH);
           keep_time = atoi(dst[3]);
-          if(keep_time>1){
-            delay(1000*keep_time);
-            digitalWrite(pin, LOW);
-          }
         }else{
           Serial.print(F(" OFF"));
           digitalWrite(pin, LOW);
@@ -111,6 +107,9 @@ void loop() {
       radio.startListening();                                       // Now, resume listening so we catch the next packets.
       Serial.print(F("Sent response "));
       Serial.println(outgoing.message);
+      Serial.print(F("Keep time:"));
+        Serial.print(keep_time);
+        Serial.print(F("\n"));
       if(keep_time>1){
         delay(1000*keep_time);
         digitalWrite(pin, LOW); 

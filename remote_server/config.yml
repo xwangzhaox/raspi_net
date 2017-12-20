@@ -1,4 +1,5 @@
 ---
+sim: true
 space_code: 8a1isp
 crontab_timestamp: '1512754861'
 interface:
@@ -23,12 +24,18 @@ commands:
   gprs_signed_in: AT+CGREG?
   attachemnt: AT+CGATT=1
   attachemnt_ready: AT+CGATT?
+  http_set_connection_gprs: AT+SAPBR=3,1,"Contype\","GPRS"
+  http_set_apn: AT+SAPBR=3,1,"APN","CMNET"
+  http_enable_gprs: AT+SAPBR=1,1
+  http_disable_gprs: AT+SAPBR=0,1
+  check_connection_get_ip: AT+SAPBR=2,1
   http_init: AT+HTTPINIT
   http_params_cid: AT+HTTPPARA="CID",1
   http_params_url: AT+HTTPPARA="URL",
   http_context: AT+HTTPPARA="CONTENT","application/json"
   http_package_size: AT+HTTPDATA=40,10000
-  http_send: AT+HTTPACTION=1
+  http_get_send: AT+HTTPACTION=0
+  http_post_send: AT+HTTPACTION=1
   http_read: AT+HTTPREAD
   http_close: AT+HTTPTERM
 cmd_quota_timestamp: '1512754861'
