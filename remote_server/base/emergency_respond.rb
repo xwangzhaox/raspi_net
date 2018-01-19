@@ -36,9 +36,8 @@ module Base
     end
 
     def execute_cmd full_action
-      log_file = "/home/pi/workspace/remote_server/execute_cmd_log.log"
-      server_file = "/home/pi/workspace/raspi_net/server/server1"
-      `sudo #{server_file} #{full_action} > #{log_file}`
+      #`sudo #{server_file} #{full_action} > #{log_file}`
+      `/home/pi/.rvm/wrappers/ruby-2.2.3@rails5/ruby /home/pi/workspace/remote_server/new_job.rb #{full_action.gsub(/ /, "_")}`
     end
   end
 end

@@ -10,8 +10,9 @@ module Base
         devise = "0 */1 * * * /home/pi/.rvm/wrappers/ruby-2.2.3@rails5/ruby /home/pi/workspace/remote_server/devise.rb"
         init_lines = [hartbit, devise]
       end
-      update_crontab(respond["new_lines"], respond["remove_lines"], init_lines)
+      update_crontab(new_lines:respond["new_lines"], remove_lines:respond["remove_lines"], init_lines:init_lines)
       update_timestamp(self.class::SETTING_PATH, respond["timestamp"])
+      @logger.info("[Update crontab] timestamp:#{respond['timestamp']}, new_lines:#{respond['new_lines']}, remove_lines:#{respond['remove_lines']}, init_lines:#{init_lines}")
     end
 
     def update_timestamp(setting_path, new_timestamp)
@@ -21,20 +22,18 @@ module Base
       end
     end
 
-    def update_crontab(new_lines, remove_lines, init_lines)
-      log_file = "/home/pi/workspace/remote_server/execute_cmd_log.log"
-      server_file = "/home/pi/workspace/raspi_net/server/server1"
+    def update_crontab(new_lines:[], remove_lines:[], init_lines:[])
       tmp_file = "/tmp/crontab_#{Time.now.to_i}.bak"
 
       `crontab -l > #{tmp_file}`
       init_lines && init_lines.each do |line|
-        `echo '#{line} > #{log_file}' >> #{tmp_file}`
+        `echo '#{line}' >> #{tmp_file}`
       end
       remove_lines && remove_lines.each do |action|
-        `sed -i '/#{action}/d'  #{tmp_file}`
+        `sed -i '/#{action.gsub(/ /, "_")}/d'  #{tmp_file}`
       end
       new_lines && new_lines.each do |line|
-        `echo '#{line["timing_str"]} sudo #{server_file} #{line["full_action"]} > #{log_file}' >> #{tmp_file}`
+        `echo '#{line["timing_str"]} /home/pi/.rvm/wrappers/ruby-2.2.3@rails5/ruby /home/pi/workspace/remote_server/new_job.rb #{line["full_action"].gsub(/ /, "_")}' >> #{tmp_file}`
       end
      `crontab #{tmp_file}`
      `rm -rf #{tmp_file}`

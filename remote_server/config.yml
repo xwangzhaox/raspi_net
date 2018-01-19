@@ -1,7 +1,7 @@
 ---
 sim: true
 space_code: 8a1isp
-crontab_timestamp: '1512754861'
+crontab_timestamp: '1516294805'
 interface:
   upload_data: http://192.168.31.178:3000/survey_data/upload
   update_cmd_quota: http://192.168.31.178:3000/spaces/update_cmd_quota
@@ -38,7 +38,7 @@ commands:
   http_post_send: AT+HTTPACTION=1
   http_read: AT+HTTPREAD
   http_close: AT+HTTPTERM
-cmd_quota_timestamp: '1512754861'
+cmd_quota_timestamp: '1512803265'
 cmd_quota:
   th:
   - temp

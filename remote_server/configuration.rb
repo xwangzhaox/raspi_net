@@ -4,6 +4,7 @@ require_relative './base/update_crontab'
 require_relative './base/emergency_respond'
 require_relative './base/cmd_quota'
 require_relative './base/http'
+require_relative './base/devise'
 
 class Configuration
   include Base::AtCommands
@@ -11,6 +12,7 @@ class Configuration
   include Base::EmergencyRespond
   include Base::CmdQuota
   include Base::Http
+  include Base::Devise
 
   SETTING_PATH= "/home/pi/workspace/remote_server/config.yml"
 
@@ -26,8 +28,7 @@ class Configuration
     update_crontab_request(init: true)
     update_cmd_quota
     update_activate
-    autoload :Devise, './devise'
-    Devise.new
+    check_devise_state
   end
 
   private
